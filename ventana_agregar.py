@@ -3,10 +3,12 @@ from tkinter import ttk,messagebox
 from Receta import Receta
 from Ingrediente import Ingrediente
 from Pasos import Pasos
-from ArchivoRecetas import RecetasCrud
+from Recetario_Logica import RecetarioLogica as rl
+from datetime import datetime as dt
 class Vista_Agregar:
     def __init__(self,parent,receta = None):
         self.parent = parent
+        self.ventana = tk.Toplevel(self.parent)
          #variables
         self.nombre = tk.StringVar()
         self.preparacion = tk.StringVar()
@@ -21,33 +23,33 @@ class Vista_Agregar:
         self.crear_widgets()  
 
     def crear_widgets(self):
-        ventana = tk.Toplevel(self.parent)
-        ventana.title("Agregar Receta")   
+        
+        self.ventana.title("Agregar Receta")   
 
         
-        lbl_nombre = tk.Label(ventana,text="Nombre Receta")
+        lbl_nombre = tk.Label(self.ventana,text="Nombre Receta")
         lbl_nombre.grid(row=0,column=0,padx=10,pady=5)
-        input_nombre = tk.Entry(ventana,width=20,textvariable=self.nombre)
+        input_nombre = tk.Entry(self.ventana,width=20,textvariable=self.nombre)
         input_nombre.grid(row=0,column=1,padx=5,pady=5)
 
-        lbl_preparacion = tk.Label(ventana,text="Tiempo Preparacion (min): ")
+        lbl_preparacion = tk.Label(self.ventana,text="Tiempo Preparacion (min): ")
         lbl_preparacion.grid(row=1,column=0,padx=10,pady=5)
-        input_preparacion = tk.Entry(ventana,width=20,textvariable=self.preparacion)
+        input_preparacion = tk.Entry(self.ventana,width=20,textvariable=self.preparacion)
         input_preparacion.grid(row=1,column=1,padx=5,pady=5)
 
-        lbl_cocccion = tk.Label(ventana,text="Tiempo Coccion (min): ")
+        lbl_cocccion = tk.Label(self.ventana,text="Tiempo Coccion (min): ")
         lbl_cocccion.grid(row=2,column=0,padx=10,pady=5)
-        input_coccion = tk.Entry(ventana,width=20,textvariable=self.coccion)
+        input_coccion = tk.Entry(self.ventana,width=20,textvariable=self.coccion)
         input_coccion.grid(row=2,column=1,padx=5,pady=5)
 
-        lbl_clave = tk.Label(ventana,text="Etiqueta: ",textvariable=self.etiqueta)
+        lbl_clave = tk.Label(self.ventana,text="Etiqueta: ")
         lbl_clave.grid(row=3,column=0,padx=10,pady=5)
-        input_clave = tk.Entry(ventana,width=20)
+        input_clave = tk.Entry(self.ventana,width=20,textvariable=self.etiqueta)
         input_clave.grid(row=3,column=1,padx=5,pady=5)
 
-        lbl_creacion = tk.Label(ventana,text="Fecha Creacion: ")
+        lbl_creacion = tk.Label(self.ventana,text="Fecha Creacion: ")
         lbl_creacion.grid(row=4,column=0,padx=10,pady=5)
-        input_creacion = tk.Entry(ventana,width=20,state=tk.DISABLED)
+        input_creacion = tk.Entry(self.ventana,width=20,state=tk.DISABLED)
         input_creacion.grid(row=4,column=1,padx=5,pady=5)
 
         ''''image = Image.open(file="default.png")
@@ -63,7 +65,7 @@ class Vista_Agregar:
         self.cant = tk.StringVar()
         self.estado_cajas_ingrediente = False
 
-        frame_ingredientes = tk.LabelFrame(ventana,text="Ingredientes")
+        frame_ingredientes = tk.LabelFrame(self.ventana,text="Ingredientes")
         frame_ingredientes.grid(row=5,column=0,columnspan=2,padx=5)
         
         lbl_non_ingr = tk.Label(frame_ingredientes,text="Nombre:")
@@ -94,35 +96,34 @@ class Vista_Agregar:
         
         #cuadro preparacion
         #variables preparacion
-        self.orden = tk.StringVar()
+        
         self.paso = tk.StringVar()
         
 
-        frame_preparacion = tk.LabelFrame(ventana,text="Preparacion")
+        frame_preparacion = tk.LabelFrame(self.ventana,text="Preparacion")
         frame_preparacion.grid(row=5,column=2,columnspan=2,padx=5,sticky=tk.N)
 
-        lbl_orden = tk.Label(frame_preparacion,text="Orden")
-        lbl_orden.grid(row=0,column=0,padx=5,pady=5)
-        entry_orden = tk.Entry(frame_preparacion,textvariable=self.orden)
-        entry_orden.grid(row=0,column=1,padx=5,pady=5,columnspan=2)
+        self.lbl_orden = tk.Label(frame_preparacion,text="Agregue de manera ordenada los pasos a seguir.",bg="grey",fg="cyan")
+        self.lbl_orden.grid(row=0,column=0,columnspan=3,padx=5,pady=5)
+        
+        self.control_paso = False
+        self.lbl_paso = tk.Label(frame_preparacion,text="Instruccion")
+        self.lbl_paso.grid(row=1,column=0,padx=5,pady=5)
+        self.entry_paso = tk.Entry(frame_preparacion,width=40,textvariable=self.paso,state=tk.DISABLED)
+        self.entry_paso.grid(row=1,column=1,padx=5,pady=5,columnspan=2)
 
-        lbl_paso = tk.Label(frame_preparacion,text="Instruccion")
-        lbl_paso.grid(row=1,column=0,padx=5,pady=5)
-        entry_paso = tk.Entry(frame_preparacion,width=40,textvariable=self.paso)
-        entry_paso.grid(row=1,column=1,padx=5,pady=5,columnspan=2)
-
-        btn_nuevo_paso = tk.Button(frame_preparacion,text="Nuevo")
-        btn_nuevo_paso.grid(row=2,column=0,padx=5,sticky=tk.EW)
-        btn_guardar_paso = tk.Button(frame_preparacion,text="Guardar",command=self.agregar_pasos)
-        btn_guardar_paso.grid(row=2,column=1,padx=5,sticky=tk.EW)
-        btn_eliminar_paso = tk.Button(frame_preparacion,text="Quitar",command=self.eliminar_paso)
-        btn_eliminar_paso.grid(row=2,column=2,padx=5,sticky=tk.EW)
+        self.btn_nuevo_paso = tk.Button(frame_preparacion,text="Nuevo",command=self.nuevo_paso)
+        self.btn_nuevo_paso.grid(row=2,column=0,padx=5,sticky=tk.EW)
+        self.btn_guardar_paso = tk.Button(frame_preparacion,text="Guardar",command=self.agregar_pasos,state=tk.DISABLED)
+        self.btn_guardar_paso.grid(row=2,column=1,padx=5,sticky=tk.EW)
+        self.btn_eliminar_paso = tk.Button(frame_preparacion,text="Quitar",command=self.eliminar_paso,state=tk.DISABLED)
+        self.btn_eliminar_paso.grid(row=2,column=2,padx=5,sticky=tk.EW)
 
 
         self.list_pasos = tk.Listbox(frame_preparacion,width=50)
         self.list_pasos.grid(row=3,column=0,columnspan=3,padx=5,pady=5)
 
-        btn_guardarAll = tk.Button(ventana,text="Guardar",command=self.guardar_general)
+        btn_guardarAll = tk.Button(self.ventana,text="Guardar",command=self.guardar_general)
         btn_guardarAll.grid(row=6,column=1,sticky=tk.EW)
     
     #boton guardar todo
@@ -138,9 +139,14 @@ class Vista_Agregar:
             self.receta.tiempoPreparacion = self.preparacion.get()
             self.receta.tiempoCocion = self.coccion.get()
             self.receta.etiqueta = self.etiqueta.get()
+            self.receta.creacion = dt.now()
             print(self.receta.getDic())
-            archivo_receta = RecetasCrud("Recetario.json")
-            archivo_receta.agregar_receta(self.receta.getDic())
+            archivo_receta = rl("Recetario.json")
+            if archivo_receta.agregarReceta(self.receta):
+                messagebox.showinfo("Agregar Receta","La receta se ha guardado con exito!")
+                self.ventana.destroy()
+            else:
+                messagebox.showwarning("Agregar Receta","Error al gurdar la receta")
         else:
             messagebox.showwarning("Agregar Producto","Las cajas principales estan vacias")
 
@@ -176,34 +182,49 @@ class Vista_Agregar:
             self.estado_cajas_ingrediente = True
 
     #funciones para cajas de pasos
-
+    def nuevo_paso(self):
+        self.activar_control_paso()
+        #self.btn_nuevo_paso.config(state=tk.DISABLED)
+    
     def agregar_pasos(self):
-        paso = Pasos(self.orden.get(),self.paso.get())
-
-        self.list_pasos.insert(tk.END,paso)
+        #paso = Pasos(self.orden.get(),self.paso.get())
+        orden = len(self.receta.lista_pasos)+1
+        paso = Pasos(orden,self.paso.get())
         self.receta.agregar_paso(paso)
-
-        self.orden.set("")
+        self.list_pasos.insert(tk.END,paso)
         self.paso.set("")
-
-        '''pos = len(self.lista_auxilar_p)+1
-        self.lista_auxilar_p.append((pos,self.paso.get()))
-        self.list_pasos.insert(tk.END,self.paso.get())
-        print(self.lista_auxilar_p)
-        print(self.lista_auxilar_p[pos-1][0])'''
+        self.activar_control_paso()
 
     def eliminar_paso(self):
-        pass
-        '''indice = self.list_pasos.curselection()[0]
-        #print(indice)
-        #self.list_pasos.delete(indice)
-        self.list_pasos.delete(0, tk.END)
-        del self.lista_auxilar_p[indice]
-        for i in range(indice,len(self.lista_auxilar_p)):
-            self.lista_auxilar_p[i][0] = i+1
-        for i in range(0,len(self.lista_auxilar_p)):
-            self.list_pasos.insert(i,"Paso "+str(self.lista_auxilar_p[i][0])+": "+self.lista_auxilar_p[i][1])
-        print(self.lista_auxilar_p)'''
+        indice = self.list_pasos.curselection()[0]
+        print(indice)
+        paso = self.receta.lista_pasos[indice]
+        print(paso)
+        self.receta.eliminar_paso(paso)
+        print(self.receta.diccionario_pasos())
+        self.list_pasos.delete(0,tk.END)
+        for p in self.receta.lista_pasos:
+            self.list_pasos.insert(tk.END,p)
+        
+        self.activar_control_paso()
+        
+    
+    def activar_control_paso(self):
+        if self.control_paso:
+            self.entry_paso.config(state=tk.DISABLED)
+            #self.btn_eliminar_paso.config(state=tk.DISABLED)
+            self.btn_guardar_paso.config(state=tk.DISABLED)
+            self.btn_nuevo_paso.config(state=tk.NORMAL)
+            self.control_paso = False
+        else:
+            self.entry_paso.config(state=tk.NORMAL)
+            #self.btn_eliminar_paso.config(state=tk.NORMAL)
+            self.btn_guardar_paso.config(state=tk.NORMAL)
+            self.btn_nuevo_paso.config(state=tk.DISABLED)
+            self.control_paso = True
+
+    
+        
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -15,27 +15,42 @@ class Receta:
 
     def agregar_ingrediente(self,ingrediente):
         #ingrediente = Ingrediente(nombre,unidad,cantidad)
-        self.ingredientes.append(ingrediente.getDic())
+        self.ingredientes.append(ingrediente)
 
     def agregar_paso(self,paso):
         #paso = Pasos(orden,instruccion)
-        self.lista_pasos.append(paso.getDic())
+        self.lista_pasos.append(paso)
     
     def eliminar_paso(self,paso):
         tam = len(self.lista_pasos)
-        for  i in range(0,tam-1):
-            if self.lista_pasos[i].get("orden") == paso.orden:
+        for  i in range(0,tam):
+            if self.lista_pasos[i].orden == paso.orden:
+                pos = paso.orden
                 del self.lista_pasos[i]
+                for j in range(i,tam-1):
+                    self.lista_pasos[j].orden = pos
+                    pos+=1
                 break
 
-
+    def diccionario_pasos(self):
+        lista = []
+        for p in self.lista_pasos:
+            lista.append(p.getDic())
+        return lista
+        
+    def diccionario_ingredientes(self):
+        lista = []
+        for ing in self.ingredientes:
+            lista.append(ing.getDic())     
+        return lista
+    
     def getDic(self):
         diccionario = {
             "nombre": self.nombre,
             "preparacion" : self.tiempoPreparacion,
             "coccion" : self.tiempoCocion,
-            "ingredientes": self.ingredientes,
-            "pasos": self.lista_pasos,
+            "ingredientes": self.diccionario_ingredientes(),
+            "pasos": self.diccionario_pasos(),
             "creacion": str(self.creacion),
             "etiqueta": self.etiqueta,
             "favorito": self.favorito    
@@ -47,22 +62,22 @@ class Receta:
 
 if __name__ == "__main__":
     receta1 = Receta("arroz con leche","10 min","60 min")
-    paso1 = Pasos(1,"Hacer corona de harina")
-    paso2 = Pasos(2,"Colocar la salmuera")
-    paso3 = Pasos(3,"mezclar")
-    paso4 = Pasos(4,"Amasar")
+    paso1 = "Hacer corona de harina"
+    paso2 = "Colocar la salmuera"
+    paso3 = "mezclar"
+    paso4 = "Amasar"
 
     receta1.agregar_paso(paso1)
     receta1.agregar_paso(paso2)
     receta1.agregar_paso(paso3)
     receta1.agregar_paso(paso4)
 
-    print(receta1.lista_pasos)
-
-    receta1.eliminar_paso(paso3)
-
-    print(receta1.lista_pasos)
-
-    print(receta1)
     print(receta1.getDic())
-    print(receta1.creacion)
+
+    receta1.eliminar_paso(receta1.lista_pasos[2])
+
+    print(receta1.getDic())
+
+    #print(receta1)
+    #print(receta1.getDic())
+    #print(receta1.creacion)
