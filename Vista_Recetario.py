@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk,messagebox
-from ventana_agregar import Vista_Agregar
+from Vista_AgregarModificar import Vista_Agregar
 from Recetario_Logica import RecetarioLogica as rl
 from Vista_Receta import VistaReceta as vr
 import math
@@ -59,13 +59,13 @@ class Recetario(ttk.Frame):
         self.btn_mostrar = tk.Button(self.frame_recetas,text="Mostrar Receta",command=self.mostrar_receta)
         self.btn_mostrar.grid(row=2,column=0)
 
-        self.btn_agregar = tk.Button(self.frame_recetas,text="Agregar Receta",command=lambda:self.agregar_modificar())
+        self.btn_agregar = tk.Button(self.frame_recetas,text="Agregar Receta",command=self.agregar)
         self.btn_agregar.grid(row=2,column=1)
 
-        self.btn_modificar = tk.Button(self.frame_recetas,text="Modificar Receta",command=lambda:self.agregar_modificar())
+        self.btn_modificar = tk.Button(self.frame_recetas,text="Modificar Receta",command=self.modificar)
         self.btn_modificar.grid(row=2,column=2)
 
-        self.btn_modificar = tk.Button(self.frame_recetas,text="Eliminar Receta")
+        self.btn_modificar = tk.Button(self.frame_recetas,text="Eliminar Receta",command=self.eliminar_receta)
         self.btn_modificar.grid(row=2,column=3)
     
     def llenar_tabla_recetas(self):
@@ -78,20 +78,42 @@ class Recetario(ttk.Frame):
                 self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
 
     
-    def agregar_modificar(self,receta=None):
-        '''Abre una ventana top leve para agregar o modicar una receta'''
-        self.ventana_agregar = Vista_Agregar(self.parent,receta)
+    def agregar(self):
+        '''Abre una ventana top leve para agregar una receta'''
+        self.ventana_agregar = Vista_Agregar(self.parent)
+    
+    def modificar(self):
+        try:
+            nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
+            #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
+            buscado = self.recetario.getReceta(nombre)
+            v_modificar = Vista_Agregar(self.parent,buscado)
+        except Exception:
+            messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
          
     def mostrar_receta(self):
         try:
             nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
             #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
             buscado = self.recetario.getReceta(nombre)
-            print(buscado.getDic())
             v_mostrar = vr(self.parent,buscado)
-            print(nombre)
-        except Exception as e:
-            messagebox.showwarning("Receta","Ha ocurrido un error "+e)
+            
+        except Exception:
+            messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
+
+    def eliminar_receta(self):
+        try:
+            nombre = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][0]
+            pos = self.recetario.buscarRecetaNombre(nombre)
+            res = messagebox.askyesno(title="Confirmar",message="¿Estas seguro que deseas eliminar este elemento del recetario?")
+            if res:
+                self.recetario.eliminarReceta(pos)
+                self.llenar_tabla_recetas()
+
+        except Exception:
+            messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
+
+
 
 root = tk.Tk()
 recetario = Recetario(root)

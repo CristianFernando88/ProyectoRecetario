@@ -9,24 +9,37 @@ class Vista_Agregar:
     def __init__(self,parent,receta = None):
         self.parent = parent
         self.ventana = tk.Toplevel(self.parent)
+        
+        self.ventana.width=675
+        self.ventana.height=475
+        self.screenwidth = self.ventana.winfo_screenwidth()
+        self.screenheight = self.ventana.winfo_screenheight()
+        self.alignstr = '%dx%d+%d+%d' % (self.ventana.width, self.ventana.height, (self.screenwidth - self.ventana.width) / 2, (self.screenheight - self.ventana.height) / 2)
+        self.ventana.geometry(self.alignstr)
+        self.ventana.resizable(False,False)
+        
          #variables
         self.nombre = tk.StringVar()
         self.preparacion = tk.StringVar()
         self.coccion = tk.StringVar()
         self.etiqueta = tk.StringVar()
-        self.fecha = None
-
+        self.fecha = tk.StringVar()
+        self.crear_widgets()  
+        self.bandera_modo = True
         if receta == None:
+            self.ventana.title("Agregar Receta")  
             self.receta = Receta()
         else:
+            self.ventana.title("Modificar Receta")  
+            self.bandera_modo = False
             self.receta = receta
-        self.crear_widgets()  
+            self.btn_guardarAll.config(text="Modificar")
+            self.cargar_receta_modificar()
+
+        
 
     def crear_widgets(self):
-        
-        self.ventana.title("Agregar Receta")   
-
-        
+         
         lbl_nombre = tk.Label(self.ventana,text="Nombre Receta")
         lbl_nombre.grid(row=0,column=0,padx=10,pady=5)
         input_nombre = tk.Entry(self.ventana,width=20,textvariable=self.nombre)
@@ -49,14 +62,10 @@ class Vista_Agregar:
 
         lbl_creacion = tk.Label(self.ventana,text="Fecha Creacion: ")
         lbl_creacion.grid(row=4,column=0,padx=10,pady=5)
-        input_creacion = tk.Entry(self.ventana,width=20,state=tk.DISABLED)
+        input_creacion = tk.Entry(self.ventana,width=20,textvariable=self.fecha,state=tk.DISABLED)
         input_creacion.grid(row=4,column=1,padx=5,pady=5)
 
-        ''''image = Image.open(file="default.png")
-        image = image.resize((100,100), Image.ANTIALIAS)
-        img = ImageTk.PhotoImage(image)
-        lbl_img = tk.Label(ventana,image=img)
-        lbl_img.grid(row=0,column=4)'''
+
 
         #cuadro ingredientes
         #variables ingredientes
@@ -123,9 +132,22 @@ class Vista_Agregar:
         self.list_pasos = tk.Listbox(frame_preparacion,width=50)
         self.list_pasos.grid(row=3,column=0,columnspan=3,padx=5,pady=5)
 
-        btn_guardarAll = tk.Button(self.ventana,text="Guardar",command=self.guardar_general)
-        btn_guardarAll.grid(row=6,column=1,sticky=tk.EW)
+        self.btn_guardarAll = tk.Button(self.ventana,text="Guardar",command=self.guardar_general)
+        self.btn_guardarAll.grid(row=6,column=1,sticky=tk.EW)
     
+    def cargar_receta_modificar(self):
+        self.nombre.set(self.receta.nombre)
+        self.preparacion.set(self.receta.tiempoPreparacion)
+        self.coccion.set(self.receta.tiempoCocion)
+        self.etiqueta.set(self.receta.etiqueta)
+        self.fecha.set(self.receta.creacion)
+        
+        for ing in self.receta.ingredientes:
+            #cadena = f'{ing.nombre}'
+            self.list_ingredientes.insert(tk.END,ing)
+        for p in self.receta.lista_pasos:
+            #cadena = f'{ing.nombre}'
+            self.list_pasos.insert(tk.END,p)
     #boton guardar todo
     def validar_cajas_gral(self):
         if self.nombre.get() != "" and self.preparacion.get()!="" and self.coccion.get()!="":
@@ -134,19 +156,30 @@ class Vista_Agregar:
             return False
         
     def guardar_general(self):
+        archivo_receta = rl("Recetario.json")
         if self.validar_cajas_gral():
-            self.receta.nombre = self.nombre.get()
-            self.receta.tiempoPreparacion = self.preparacion.get()
-            self.receta.tiempoCocion = self.coccion.get()
-            self.receta.etiqueta = self.etiqueta.get()
-            self.receta.creacion = dt.now()
-            print(self.receta.getDic())
-            archivo_receta = rl("Recetario.json")
-            if archivo_receta.agregarReceta(self.receta):
-                messagebox.showinfo("Agregar Receta","La receta se ha guardado con exito!")
-                self.ventana.destroy()
+            #print(self.receta.getDic())
+            if self.bandera_modo:
+                self.receta.nombre = self.nombre.get()
+                self.receta.tiempoPreparacion = self.preparacion.get()
+                self.receta.tiempoCocion = self.coccion.get()
+                self.receta.etiqueta = self.etiqueta.get()
+                self.receta.creacion = dt.now()
+                if archivo_receta.agregarReceta(self.receta):
+                    messagebox.showinfo("Agregar Receta","La receta se ha guardado con exito!")
+                    self.ventana.destroy()
+                else:
+                    messagebox.showwarning("Agregar Receta","Error al gurdar la receta")
             else:
-                messagebox.showwarning("Agregar Receta","Error al gurdar la receta")
+                res = messagebox.askyesno(title="Confirmar",message="¿Esta seguro que desea guardar los cambios?")
+                if res:
+                    pos = archivo_receta.buscarRecetaNombre(self.receta.nombre)
+                    self.receta.nombre = self.nombre.get()
+                    self.receta.tiempoPreparacion = self.preparacion.get()
+                    self.receta.tiempoCocion = self.coccion.get()
+                    self.receta.etiqueta = self.etiqueta.get()
+                    archivo_receta.modificaReceta(self.receta,pos)
+                    messagebox.showinfo("Modificar","Cambios guardados exitosamente!")
         else:
             messagebox.showwarning("Agregar Producto","Las cajas principales estan vacias")
 

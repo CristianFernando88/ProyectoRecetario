@@ -10,30 +10,37 @@ class RecetarioLogica:
     
     def getRecetas(self):
         lista_diccionario = self.archivo.get_recetas()
-        print(lista_diccionario)
+        #print(lista_diccionario)
         lista = []
         for dic in lista_diccionario:
             #print(dic)
             receta = Receta(dic["nombre"],dic["preparacion"],dic["coccion"])
             #print(dic["ingredientes"])
-            print()
-            #aux_i = []
-            '''for ing in dic["ingredientes"]:
+            #print()
+            aux_i = []
+            aux_p = []
+            for ing in dic["ingredientes"]:
                 ingrediente = Ingrediente(ing["nombre"],ing["unidad"],ing["cantidad"])
                 aux_i.append(ingrediente)
                 #print(ingrediente)
                 #receta.agregar_ingrediente(ingrediente)
-            print(len(aux_i))
+            #print(len(aux_i))
             receta.ingredientes = aux_i
             for p in dic["pasos"]:
                 paso = Pasos(p["orden"],p["instruccion"])
-                receta.agregar_paso(paso)'''
+                #receta.agregar_paso(paso)
+                aux_p.append(paso)
+            receta.lista_pasos = aux_p
             receta.creacion = dic["creacion"]
             receta.etiqueta = dic["etiqueta"]
             receta.favorito = dic["favorito"]
             lista.append(receta)
         return lista
-        
+    
+    def buscarRecetaNombre(self,nombre):
+        '''retorna la posicion de un obj receta por nombre'''
+        return self.archivo.buscar_receta_nombre(nombre)
+
     def agregarReceta(self,receta):
         '''agrega una receta al archivo'''
         if self.archivo.buscar_receta_nombre(receta.nombre) == -1:
@@ -48,10 +55,23 @@ class RecetarioLogica:
             return recetas[pos]
         else:
             return None
+        
+    def modificaReceta(self,receta,pos):
+        '''modifica una receta de una posicion dada'''
+        self.archivo.modificar_receta(pos,receta.getDic())
+
+    def eliminarReceta(self,pos):
+        self.archivo.eliminar_receta(pos)
+        
+
+
 
 if __name__ == "__main__":
     rl = RecetarioLogica("Recetario.json")
     receta = rl.getReceta("Arroz con leche")
-    print(rl.getRecetas())
+    #print(rl.getRecetas())
+    for r in rl.getRecetas():
+        print(r.getDic())
+        print()
     #print(receta)
     #print(receta.getDic())
