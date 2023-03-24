@@ -8,6 +8,14 @@ class VistaReceta:
         self.ventana = tk.Toplevel(self.parent)
         self.ventana.title("Receta")
         
+        self.ventana.width=335
+        self.ventana.height=450
+        self.screenwidth = self.ventana.winfo_screenwidth()
+        self.screenheight = self.ventana.winfo_screenheight()
+        self.alignstr = '%dx%d+%d+%d' % (self.ventana.width, self.ventana.height, (self.screenwidth - self.ventana.width) / 2, (self.screenheight - self.ventana.height) / 2)
+        self.ventana.geometry(self.alignstr)
+        self.ventana.resizable(False,False)
+        
         self.nombre = self.receta.nombre.upper()
         #self.imagen = imagen
         self.tiempoPreparacion = self.receta.tiempoPreparacion

@@ -5,24 +5,27 @@ from Ingrediente import Ingrediente
 from Pasos import Pasos
 from Recetario_Logica import RecetarioLogica as rl
 from datetime import datetime as dt
+from PIL import ImageTk, Image
+from tkinter import filedialog
 class Vista_Agregar:
     def __init__(self,parent,receta = None):
         self.parent = parent
         self.ventana = tk.Toplevel(self.parent)
-        
+        self.parent = parent
         self.ventana.width=675
-        self.ventana.height=475
+        self.ventana.height=520
         self.screenwidth = self.ventana.winfo_screenwidth()
         self.screenheight = self.ventana.winfo_screenheight()
         self.alignstr = '%dx%d+%d+%d' % (self.ventana.width, self.ventana.height, (self.screenwidth - self.ventana.width) / 2, (self.screenheight - self.ventana.height) / 2)
         self.ventana.geometry(self.alignstr)
-        self.ventana.resizable(False,False)
         
          #variables
         self.nombre = tk.StringVar()
+        
         self.preparacion = tk.StringVar()
         self.coccion = tk.StringVar()
         self.etiqueta = tk.StringVar()
+        self.favorito = tk.BooleanVar()
         self.fecha = tk.StringVar()
         self.crear_widgets()  
         self.bandera_modo = True
@@ -59,13 +62,34 @@ class Vista_Agregar:
         lbl_clave.grid(row=3,column=0,padx=10,pady=5)
         input_clave = tk.Entry(self.ventana,width=20,textvariable=self.etiqueta)
         input_clave.grid(row=3,column=1,padx=5,pady=5)
+        
+        chbtn_favorito = tk.Checkbutton(self.ventana,text="Es favorito",variable=self.favorito,command=lambda:print(self.favorito.get()))
+        chbtn_favorito.grid(row=4,column=0,padx=5,pady=5)
 
         lbl_creacion = tk.Label(self.ventana,text="Fecha Creacion: ")
-        lbl_creacion.grid(row=4,column=0,padx=10,pady=5)
+        lbl_creacion.grid(row=5,column=0,padx=10,pady=5)
         input_creacion = tk.Entry(self.ventana,width=20,textvariable=self.fecha,state=tk.DISABLED)
-        input_creacion.grid(row=4,column=1,padx=5,pady=5)
+        input_creacion.grid(row=5,column=1,padx=5,pady=5)
 
-
+        #cuadro imagen
+        frame_imagen = tk.LabelFrame(self.ventana,text="Foto")
+        frame_imagen.grid(row=0,column=2,padx=5,pady=5,rowspan=5,columnspan=2)
+        
+        self.imagen = ImageTk.PhotoImage(Image.open("imagenes/agregar.png").resize((150,130)))
+        
+        label_imagen = tk.Label(frame_imagen,image = self.imagen)
+        
+        label_imagen.grid(row=0,column=0,columnspan=2)
+        
+        def abrirArchivo():
+            archivo = filedialog.asksaveasfilename(title="Buscar Imagen",initialdir='imagenes',
+            filetypes=(("Archivos jpg","*.jpg"),("Archivos png","*.png"),("Todos los archivos","*.*")))
+            print(archivo)
+            
+        btn_agregar_img = tk.Button(self.ventana,text="Agregar",command=abrirArchivo)
+        btn_agregar_img.grid(row=5,column=2,sticky=tk.E,padx=5)
+        btn_quitar_img = tk.Button(self.ventana,text="Quitar",padx=5)
+        btn_quitar_img.grid(row=5,column=3,sticky=tk.W)
 
         #cuadro ingredientes
         #variables ingredientes
@@ -75,7 +99,7 @@ class Vista_Agregar:
         self.estado_cajas_ingrediente = False
 
         frame_ingredientes = tk.LabelFrame(self.ventana,text="Ingredientes")
-        frame_ingredientes.grid(row=5,column=0,columnspan=2,padx=5)
+        frame_ingredientes.grid(row=6,column=0,columnspan=2,padx=5)
         
         lbl_non_ingr = tk.Label(frame_ingredientes,text="Nombre:")
         lbl_non_ingr.grid(row=0,column=0,padx=5,pady=5)
@@ -110,7 +134,7 @@ class Vista_Agregar:
         
 
         frame_preparacion = tk.LabelFrame(self.ventana,text="Preparacion")
-        frame_preparacion.grid(row=5,column=2,columnspan=2,padx=5,sticky=tk.N)
+        frame_preparacion.grid(row=6,column=2,columnspan=2,padx=5,sticky=tk.N)
 
         self.lbl_orden = tk.Label(frame_preparacion,text="Agregue de manera ordenada los pasos a seguir.",bg="grey",fg="cyan")
         self.lbl_orden.grid(row=0,column=0,columnspan=3,padx=5,pady=5)
@@ -133,7 +157,7 @@ class Vista_Agregar:
         self.list_pasos.grid(row=3,column=0,columnspan=3,padx=5,pady=5)
 
         self.btn_guardarAll = tk.Button(self.ventana,text="Guardar",command=self.guardar_general)
-        self.btn_guardarAll.grid(row=6,column=1,sticky=tk.EW)
+        self.btn_guardarAll.grid(row=7,column=1,sticky=tk.EW)
     
     def cargar_receta_modificar(self):
         self.nombre.set(self.receta.nombre)
@@ -141,7 +165,7 @@ class Vista_Agregar:
         self.coccion.set(self.receta.tiempoCocion)
         self.etiqueta.set(self.receta.etiqueta)
         self.fecha.set(self.receta.creacion)
-        
+        self.favorito.set(self.receta.favorito)
         for ing in self.receta.ingredientes:
             #cadena = f'{ing.nombre}'
             self.list_ingredientes.insert(tk.END,ing)
@@ -164,6 +188,7 @@ class Vista_Agregar:
                 self.receta.tiempoPreparacion = self.preparacion.get()
                 self.receta.tiempoCocion = self.coccion.get()
                 self.receta.etiqueta = self.etiqueta.get()
+                self.receta.favorito = self.favorito.get()
                 self.receta.creacion = dt.now()
                 if archivo_receta.agregarReceta(self.receta):
                     messagebox.showinfo("Agregar Receta","La receta se ha guardado con exito!")
@@ -178,6 +203,7 @@ class Vista_Agregar:
                     self.receta.tiempoPreparacion = self.preparacion.get()
                     self.receta.tiempoCocion = self.coccion.get()
                     self.receta.etiqueta = self.etiqueta.get()
+                    self.receta.favorito = self.favorito.get()
                     archivo_receta.modificaReceta(self.receta,pos)
                     messagebox.showinfo("Modificar","Cambios guardados exitosamente!")
         else:

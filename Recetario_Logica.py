@@ -40,6 +40,10 @@ class RecetarioLogica:
     def buscarRecetaNombre(self,nombre):
         '''retorna la posicion de un obj receta por nombre'''
         return self.archivo.buscar_receta_nombre(nombre)
+    
+    def buscarRecetaEtiqueta(self,etiqueta):
+        '''retorna la posicion de un obj receta por nombre'''
+        return self.archivo.buscar_receta_etiqueta(etiqueta)
 
     def agregarReceta(self,receta):
         '''agrega una receta al archivo'''

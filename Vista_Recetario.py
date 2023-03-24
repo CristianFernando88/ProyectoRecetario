@@ -11,8 +11,8 @@ class Recetario(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
         self.parent = parent
-        self.parent.width=900
-        self.parent.height=450
+        self.parent.width=575
+        self.parent.height=400
         self.screenwidth = self.winfo_screenwidth()
         self.screenheight = self.winfo_screenheight()
         self.alignstr = '%dx%d+%d+%d' % (self.parent.width, self.parent.height, (self.screenwidth - self.parent.width) / 2, (self.screenheight - self.parent.height) / 2)
@@ -24,15 +24,25 @@ class Recetario(ttk.Frame):
         self.llenar_tabla_recetas()
 
     def crear_widgets(self):
-        self.entry_buscar = tk.Entry(self.parent,width=30)
-        self.entry_buscar.grid(row=0,column=0,pady=20,sticky=tk.EW,padx=10)
+        
+        self.buscado = tk.StringVar()
+       # self.fitlro = tk.StringVar()
+        
+        self.lbl_filtro = tk.Label(self.parent,text="Seleccione filtro: ")
+        self.lbl_filtro.grid(row=0,column=0,pady=5,padx=5)
+        
+        self.cbo_filtro = ttk.Combobox(self.parent,state="readonly",values=("","Nombre","Etiqueta"),width=10)
+        self.cbo_filtro.grid(row=0,column=1,pady=5,padx=5)
+        
+        self.entry_buscar = tk.Entry(self.parent,width=25,textvariable=self.buscado)
+        self.entry_buscar.grid(row=0,column=2,pady=20,sticky=tk.EW,padx=10)
 
-        self.btn_buscar = tk.Button(self.parent,text="Buscar Receta")
-        self.btn_buscar.grid(row=0,column=1,sticky=tk.W)
+        self.btn_buscar = tk.Button(self.parent,text="Buscar Receta",command=self.busqueda_receta)
+        self.btn_buscar.grid(row=0,column=3,sticky=tk.W)
         
         
         self.frame_recetas = ttk.LabelFrame(self.parent,text="Recetas")
-        self.frame_recetas.grid(row=1,column=0,columnspan=4)
+        self.frame_recetas.grid(row=2,column=0,columnspan=4)
 
         self.tabla_recetas = ttk.Treeview(self.frame_recetas, columns=tuple(['nombre', 'preparacion', 'coccion','etiqueta']))
         self.tabla_recetas.grid(row=1, column=0, columnspan=4,padx=10, pady=5)
@@ -113,7 +123,32 @@ class Recetario(ttk.Frame):
         except Exception:
             messagebox.showwarning("Receta","Debe seleccionar una fila de la tabla")
 
-
+    def busqueda_receta(self):
+        #print(self.buscado.get())
+        
+        num=0
+        #print(lista_buscado)
+        if self.cbo_filtro.get() == "Nombre":
+            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.nombre.lower(),self.recetario.getRecetas()))
+            if lista_buscado != []:
+                self.tabla_recetas.delete(*self.tabla_recetas.get_children())
+                for receta in lista_buscado:
+                    num += 1
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
+            else:
+                messagebox.showinfo("Rcetario","No hay resultados para la busqueda.")
+        elif self.cbo_filtro.get() == "Etiqueta":
+            lista_buscado = list(filter(lambda r:  self.buscado.get().lower() in r.etiqueta.lower(),self.recetario.getRecetas()))
+            if lista_buscado != []:
+                self.tabla_recetas.delete(*self.tabla_recetas.get_children())
+                for receta in lista_buscado:
+                    num += 1
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
+            else:
+                messagebox.showinfo("Rcetario","No hay resultados para la busqueda.")
+        else:
+            messagebox.showinfo("Rcetario","Seleccione un filtro para buscar") 
+            
 
 root = tk.Tk()
 recetario = Recetario(root)

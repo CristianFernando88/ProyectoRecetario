@@ -29,7 +29,20 @@ class RecetasCrud:
         lista = self.get_recetas()
         pos = -1
         for i in range(0,len(lista)):
-            if lista[i]["nombre"] == nombre:
+            if lista[i]["nombre"].lower() == nombre.lower():
+                pos = i
+                return pos
+        return pos
+    
+    def buscar_receta_etiqueta(self,etiqueta):
+        '''
+        Retorna la posicion de una receta dentro de una lista,
+        a travez de su etiqueta pasado como parametro
+        '''
+        lista = self.get_recetas()
+        pos = -1
+        for i in range(0,len(lista)):
+            if lista[i]["etiqueta"].lower() == etiqueta.lower():
                 pos = i
                 return pos
         return pos
