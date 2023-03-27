@@ -43,8 +43,9 @@ class Recetario(ttk.Frame):
         
         self.frame_recetas = ttk.LabelFrame(self.parent,text="Recetas")
         self.frame_recetas.grid(row=2,column=0,columnspan=4)
+        
 
-        self.tabla_recetas = ttk.Treeview(self.frame_recetas, columns=tuple(['nombre', 'preparacion', 'coccion','etiqueta']))
+        self.tabla_recetas = ttk.Treeview(self.frame_recetas,selectmode='browse',columns=tuple(['nombre', 'preparacion', 'coccion','etiqueta']))
         self.tabla_recetas.grid(row=1, column=0, columnspan=4,padx=10, pady=5)
         
         # asignamos tamño a las columnas
@@ -81,11 +82,21 @@ class Recetario(ttk.Frame):
     def llenar_tabla_recetas(self):
         self.tabla_recetas.delete(*self.tabla_recetas.get_children())
         num=0
+        self.tabla_recetas.tag_configure('favorito', background='black', foreground='red')
+        self.tabla_recetas.tag_configure('normal', background='white', foreground='red')
         if self.recetario.getRecetas() != []:
             #self.label_estado['text']=""
+            
             for receta in self.recetario.getRecetas():
                 num += 1
-                self.tabla_recetas.insert("", tk.END, text=str(num),values=(receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta))
+                valores = (receta.nombre,receta.tiempoPreparacion,receta.tiempoCocion,receta.etiqueta) 
+                my_tag='favorito' if num == 1 else 'normal' 
+                self.tabla_recetas.insert("", tk.END, text=str(num),values=valores,tags = (my_tag))
+                '''if num == 1:
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=valores,tags = (''))
+                else:
+                    self.tabla_recetas.insert("", tk.END, text=str(num),values=valores)'''
+                    
 
     
     def agregar(self):

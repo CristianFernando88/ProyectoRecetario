@@ -38,6 +38,9 @@ class Vista_Agregar:
             self.receta = receta
             self.btn_guardarAll.config(text="Modificar")
             self.cargar_receta_modificar()
+            
+        self.activar_control_paso(0)
+        self.config_cajas_ingredientes(0)
 
         
 
@@ -50,12 +53,15 @@ class Vista_Agregar:
 
         lbl_preparacion = tk.Label(self.ventana,text="Tiempo Preparacion (min): ")
         lbl_preparacion.grid(row=1,column=0,padx=10,pady=5)
-        input_preparacion = tk.Entry(self.ventana,width=20,textvariable=self.preparacion)
+        
+        def validate_entry(text):
+            return text.isdecimal()
+        input_preparacion = tk.Entry(self.ventana,width=20,validate="key",validatecommand=(self.ventana.register(validate_entry),"%S"),textvariable=self.preparacion)
         input_preparacion.grid(row=1,column=1,padx=5,pady=5)
 
         lbl_cocccion = tk.Label(self.ventana,text="Tiempo Coccion (min): ")
         lbl_cocccion.grid(row=2,column=0,padx=10,pady=5)
-        input_coccion = tk.Entry(self.ventana,width=20,textvariable=self.coccion)
+        input_coccion = tk.Entry(self.ventana,width=20,validate="key",validatecommand=(self.ventana.register(validate_entry),"%S"),textvariable=self.coccion)
         input_coccion.grid(row=2,column=1,padx=5,pady=5)
 
         lbl_clave = tk.Label(self.ventana,text="Etiqueta: ")
@@ -97,6 +103,11 @@ class Vista_Agregar:
         self.unidad = tk.StringVar()
         self.cant = tk.StringVar()
         self.estado_cajas_ingrediente = False
+        
+        def validate_entry_f(text):
+            if text.isdecimal():
+                return True
+            return False
 
         frame_ingredientes = tk.LabelFrame(self.ventana,text="Ingredientes")
         frame_ingredientes.grid(row=6,column=0,columnspan=2,padx=5)
@@ -108,22 +119,24 @@ class Vista_Agregar:
 
         lbl_medida = tk.Label(frame_ingredientes,text="Unida de Medida:")
         lbl_medida.grid(row=1,column=0,padx=5,pady=5)
-        self.entry_medida = tk.Entry(frame_ingredientes,textvariable=self.unidad,state=tk.DISABLED)
-        self.entry_medida.grid(row=1,column=1,pady=5)
+        
+        valores_medida = ("","cc","lt","kg","grs.","unidades","docena","pizca")
+        self.cbo_medida = ttk.Combobox(frame_ingredientes,values=valores_medida,textvariable=self.unidad,state=tk.DISABLED)
+        self.cbo_medida.grid(row=1,column=1,pady=5)
 
         lbl_cantidad = tk.Label(frame_ingredientes,text="Cantidad:")
         lbl_cantidad.grid(row=2,column=0,padx=5,pady=5)
-        self.entry_cantidad = tk.Entry(frame_ingredientes,textvariable=self.cant,state=tk.DISABLED)
+        self.entry_cantidad = tk.Entry(frame_ingredientes,textvariable=self.cant,validate="key",validatecommand=(self.ventana.register(validate_entry_f),"%S"),state=tk.DISABLED)
         self.entry_cantidad.grid(row=2,column=1,pady=5)
         
         self.list_ingredientes = tk.Listbox(frame_ingredientes,width=50)
         self.list_ingredientes.grid(row=4,column=0,columnspan=4,padx=5,pady=5,rowspan=4)
-        btn_nuevo = tk.Button(frame_ingredientes,text="Nuevo",command=self.config_cajas_ingredientes)
-        btn_nuevo.grid(row=0,column=3,sticky=tk.EW,padx=5)
-        btn_guardar = tk.Button(frame_ingredientes,text="Guardar",command=self.guardar_ingrediente)
-        btn_guardar.grid(row=1,column=3,sticky=tk.EW,padx=5)
-        btn_quitar = tk.Button(frame_ingredientes,text="Quitar",command=self.eliminar_ingrediente)
-        btn_quitar.grid(row=2,column=3,sticky=tk.EW,padx=5)
+        self.btn_nuevo = tk.Button(frame_ingredientes,text="Nuevo",command=lambda:self.config_cajas_ingredientes(1))
+        self.btn_nuevo.grid(row=0,column=3,sticky=tk.EW,padx=5)
+        self.btn_guardar = tk.Button(frame_ingredientes,text="Guardar",command=self.guardar_ingrediente)
+        self.btn_guardar.grid(row=1,column=3,sticky=tk.EW,padx=5)
+        self.btn_quitar = tk.Button(frame_ingredientes,text="Quitar",command=self.eliminar_ingrediente)
+        self.btn_quitar.grid(row=2,column=3,sticky=tk.EW,padx=5)
 
         
         
@@ -132,7 +145,6 @@ class Vista_Agregar:
         
         self.paso = tk.StringVar()
         
-
         frame_preparacion = tk.LabelFrame(self.ventana,text="Preparacion")
         frame_preparacion.grid(row=6,column=2,columnspan=2,padx=5,sticky=tk.N)
 
@@ -140,6 +152,7 @@ class Vista_Agregar:
         self.lbl_orden.grid(row=0,column=0,columnspan=3,padx=5,pady=5)
         
         self.control_paso = False
+        
         self.lbl_paso = tk.Label(frame_preparacion,text="Instruccion")
         self.lbl_paso.grid(row=1,column=0,padx=5,pady=5)
         self.entry_paso = tk.Entry(frame_preparacion,width=40,textvariable=self.paso,state=tk.DISABLED)
@@ -151,7 +164,6 @@ class Vista_Agregar:
         self.btn_guardar_paso.grid(row=2,column=1,padx=5,sticky=tk.EW)
         self.btn_eliminar_paso = tk.Button(frame_preparacion,text="Quitar",command=self.eliminar_paso,state=tk.DISABLED)
         self.btn_eliminar_paso.grid(row=2,column=2,padx=5,sticky=tk.EW)
-
 
         self.list_pasos = tk.Listbox(frame_preparacion,width=50)
         self.list_pasos.grid(row=3,column=0,columnspan=3,padx=5,pady=5)
@@ -211,11 +223,14 @@ class Vista_Agregar:
 
     #funciones para caja de ingredientes
     def guardar_ingrediente(self):
-        ingrediente = Ingrediente(self.nom_ing.get(),self.unidad.get(),self.cant.get())
-        self.limpar_ingrediente()
-        self.config_cajas_ingredientes()
-        self.list_ingredientes.insert(tk.END,ingrediente)
-        self.receta.agregar_ingrediente(ingrediente)
+        if self.nom_ing.get()!=0 and self.unidad.get!="" and self.cant.get()!="":
+            ingrediente = Ingrediente(self.nom_ing.get(),self.unidad.get(),self.cant.get())
+            self.limpar_ingrediente()
+            self.config_cajas_ingredientes(0)
+            self.list_ingredientes.insert(tk.END,ingrediente)
+            self.receta.agregar_ingrediente(ingrediente)
+        else:
+            messagebox.showwarning("Receta ingrediente","Verifique que ningun campo este vacio")
     
     def eliminar_ingrediente(self):
         indice = self.list_ingredientes.curselection()[0]
@@ -227,22 +242,33 @@ class Vista_Agregar:
         self.unidad.set("")
         self.cant.set("")
 
-    def config_cajas_ingredientes(self):
+    def config_cajas_ingredientes(self,op):
         #print(self.entry_nom_ingr.configure["state"])
-        if self.estado_cajas_ingrediente:
+        if op==0:
             self.entry_nom_ingr.configure(state=tk.DISABLED)
-            self.entry_medida.configure(state=tk.DISABLED)
+            self.cbo_medida.configure(state=tk.DISABLED)
             self.entry_cantidad.configure(state=tk.DISABLED)
-            self.estado_cajas_ingrediente = False
-        else: 
+            self.btn_nuevo.configure(state=tk.NORMAL)
+            self.btn_guardar.configure(state=tk.DISABLED)
+            if self.list_ingredientes.size()>0:
+                self.btn_quitar.config(state=tk.NORMAL)
+            else:
+                self.btn_quitar.config(state=tk.DISABLED)
+        elif op==1: 
             self.entry_nom_ingr.configure(state=tk.NORMAL)
-            self.entry_medida.configure(state=tk.NORMAL)
+            self.cbo_medida.configure(state=tk.NORMAL)
             self.entry_cantidad.configure(state=tk.NORMAL)
-            self.estado_cajas_ingrediente = True
+            self.btn_guardar.configure(state=tk.NORMAL)
+            self.btn_nuevo.config(state=tk.DISABLED)
+        elif op==2:
+            if self.list_ingredientes.size()>0:
+                self.btn_quitar.config(state=tk.NORMAL)
+            else:
+                self.btn_quitar.config(state=tk.DISABLED)
 
     #funciones para cajas de pasos
     def nuevo_paso(self):
-        self.activar_control_paso()
+        self.activar_control_paso(1)
         #self.btn_nuevo_paso.config(state=tk.DISABLED)
     
     def agregar_pasos(self):
@@ -252,35 +278,48 @@ class Vista_Agregar:
         self.receta.agregar_paso(paso)
         self.list_pasos.insert(tk.END,paso)
         self.paso.set("")
-        self.activar_control_paso()
+        self.activar_control_paso(0)
 
     def eliminar_paso(self):
-        indice = self.list_pasos.curselection()[0]
-        print(indice)
-        paso = self.receta.lista_pasos[indice]
-        print(paso)
-        self.receta.eliminar_paso(paso)
-        print(self.receta.diccionario_pasos())
-        self.list_pasos.delete(0,tk.END)
-        for p in self.receta.lista_pasos:
-            self.list_pasos.insert(tk.END,p)
-        
-        self.activar_control_paso()
+        try:  
+            indice = self.list_pasos.curselection()[0]
+            print(indice)
+            paso = self.receta.lista_pasos[indice]
+            print(paso)
+            self.receta.eliminar_paso(paso)
+            print(self.receta.diccionario_pasos())
+            self.list_pasos.delete(0,tk.END)
+            for p in self.receta.lista_pasos:
+                self.list_pasos.insert(tk.END,p)
+            self.activar_control_paso(2)
+        except:
+            messagebox.showwarning("Pasos","Debe seleccionar un elemento de la lista")
         
     
-    def activar_control_paso(self):
-        if self.control_paso:
+    def activar_control_paso(self,op):
+        if op==0:
             self.entry_paso.config(state=tk.DISABLED)
             #self.btn_eliminar_paso.config(state=tk.DISABLED)
             self.btn_guardar_paso.config(state=tk.DISABLED)
             self.btn_nuevo_paso.config(state=tk.NORMAL)
-            self.control_paso = False
-        else:
+            if self.list_pasos.size()>0:
+                self.btn_eliminar_paso.config(state=tk.NORMAL)
+            else:
+                self.btn_eliminar_paso.config(state=tk.DISABLED)
+                    
+        elif op==1:
             self.entry_paso.config(state=tk.NORMAL)
             #self.btn_eliminar_paso.config(state=tk.NORMAL)
             self.btn_guardar_paso.config(state=tk.NORMAL)
             self.btn_nuevo_paso.config(state=tk.DISABLED)
-            self.control_paso = True
+        elif op==2:
+            if self.list_pasos.size()>0:
+                self.btn_eliminar_paso.config(state=tk.NORMAL)
+            else:
+                self.btn_eliminar_paso.config(state=tk.DISABLED)
+            
+                
+               
 
     
         

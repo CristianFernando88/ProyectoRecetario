@@ -31,14 +31,14 @@ class VistaReceta:
     def crear_widget(self):
         self.lbl_nombre = tk.Label(self.ventana,text=self.nombre,font = font.Font(family="Times",size=18),fg="DarkOrange4")
         self.lbl_nombre.grid(row=0,column=0,padx=5,pady=5)
-        self.cuadro_texto = tk.Text(self.ventana,width=40,height=20)
+        self.cuadro_texto = tk.Text(self.ventana,width=40,height=24)
         self.cuadro_texto.grid(row=1,column=0,padx=5,pady=5)
     
     def agregar_contenido(self):
         self.cuadro_texto.insert('end',"PREPARACION:\n")
-        self.cuadro_texto.insert('end',self.tiempoPreparacion+"\n")
+        self.cuadro_texto.insert('end',self.tiempoPreparacion+" min."+"\n")
         self.cuadro_texto.insert('end',"COCCION:\n")
-        self.cuadro_texto.insert('end',self.tiempoCocion+"\n")
+        self.cuadro_texto.insert('end',self.tiempoCocion+" min."+"\n")
         self.cuadro_texto.insert('end',"INGREDIENTES:\n")
         for ing in self.ingredientes:
             self.cuadro_texto.insert('end',f'{ing}\n')
