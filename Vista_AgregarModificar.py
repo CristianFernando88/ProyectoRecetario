@@ -228,9 +228,10 @@ class Vista_Agregar:
         if self.nom_ing.get()!=0 and self.unidad.get!="" and self.cant.get()!="":
             ingrediente = Ingrediente(self.nom_ing.get(),self.unidad.get(),self.cant.get())
             self.limpar_ingrediente()
-            self.config_cajas_ingredientes(0)
+            
             self.list_ingredientes.insert(tk.END,ingrediente)
             self.receta.agregar_ingrediente(ingrediente)
+            self.config_cajas_ingredientes(0)
         else:
             messagebox.showwarning("Receta ingrediente","Verifique que ningun campo este vacio")
     
