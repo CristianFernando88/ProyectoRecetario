@@ -8,6 +8,7 @@ import datetime as dt
 
 
 class Recetario(ttk.Frame):
+    '''crea la ventana principal de la aplicación'''
     def __init__(self,parent):
         super().__init__(parent)
         self.parent = parent
@@ -21,6 +22,7 @@ class Recetario(ttk.Frame):
         self.parent.iconbitmap('icono.ico')
         self.recetario = rl("Recetario.json")
         self.crear_widgets()
+        self.cargar_receta_dia()
         self.llenar_tabla_recetas()
 
     def crear_widgets(self):
@@ -29,18 +31,28 @@ class Recetario(ttk.Frame):
        # self.fitlro = tk.StringVar()
         
         self.lbl_filtro = tk.Label(self.parent,text="Seleccione filtro: ")
-        self.lbl_filtro.grid(row=0,column=0,pady=5,padx=5)
+        self.lbl_filtro.grid(row=1,column=0,pady=5,padx=5)
         
         self.cbo_filtro = ttk.Combobox(self.parent,state="readonly",values=("","Nombre","Etiqueta"),width=10)
-        self.cbo_filtro.grid(row=0,column=1,pady=5,padx=5)
+        self.cbo_filtro.grid(row=1,column=1,pady=5,padx=5)
         
         self.entry_buscar = tk.Entry(self.parent,width=25,textvariable=self.buscado)
-        self.entry_buscar.grid(row=0,column=2,pady=20,sticky=tk.EW,padx=10)
+        self.entry_buscar.grid(row=1,column=2,pady=5,sticky=tk.EW,padx=10)
 
         self.btn_buscar = tk.Button(self.parent,text="Buscar Receta",command=self.busqueda_receta)
-        self.btn_buscar.grid(row=0,column=3,sticky=tk.W)
+        self.btn_buscar.grid(row=1,column=3,sticky=tk.W)
         
         
+        self.lbl_receta_dia = ttk.Label(self.parent,text="Receta del dia",foreground="red")
+        self.lbl_receta_dia.grid(row=0,column=0,sticky=tk.EW,padx=10,pady=5)
+
+        self.receta_dia = tk.StringVar()
+        self.entry_receta_dia = tk.Entry(self.parent,width=25,textvariable=self.receta_dia)
+        self.entry_receta_dia.grid(row=0,column=1,sticky=tk.EW,padx=10,pady=5)
+
+        self.btn_receta_dia = tk.Button(self.parent,text="Ver",foreground="red",command=self.mostrar_receta_dia)
+        self.btn_receta_dia.grid(row=0,column=2,sticky=tk.EW,padx=10,pady=5)
+
         self.frame_recetas = ttk.LabelFrame(self.parent,text="Recetas")
         self.frame_recetas.grid(row=2,column=0,columnspan=4)
         
@@ -79,6 +91,16 @@ class Recetario(ttk.Frame):
         self.btn_modificar = tk.Button(self.frame_recetas,text="Eliminar Receta",command=self.eliminar_receta)
         self.btn_modificar.grid(row=2,column=3)
     
+    def cargar_receta_dia(self):
+        receta = self.recetario.retorna_aleatorio()
+        self.receta_dia.set(receta.nombre)
+
+    def mostrar_receta_dia(self):
+        nombre = self.receta_dia.get()
+        #etiqueta = self.tabla_recetas.item(self.tabla_recetas.selection())['values'][3]
+        buscado = self.recetario.getReceta(nombre)
+        v_receta_dia = vr(self.parent,buscado)
+
     def llenar_tabla_recetas(self):
         self.tabla_recetas.delete(*self.tabla_recetas.get_children())
         num=0

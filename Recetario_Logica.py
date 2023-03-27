@@ -2,13 +2,16 @@ from Recetario_Servicios import RecetasCrud as rc
 from Receta import Receta
 from Pasos import Pasos
 from Ingrediente import Ingrediente
+import random
 class RecetarioLogica:
+    '''Interactuca con los objetos receta y el archivo json donde se guardaran los datos'''
     def __init__(self,ruta_archivo):
         self.ruta = ruta_archivo
         self.archivo = rc(ruta_archivo)
         
     
     def getRecetas(self):
+        '''obtiene una lista de objetos recetas'''
         lista_diccionario = self.archivo.get_recetas()
         #print(lista_diccionario)
         lista = []
@@ -53,6 +56,7 @@ class RecetarioLogica:
         return False
     
     def getReceta(self,nombre):
+        '''retorna una receta mediante el nombre'''
         recetas = self.getRecetas()
         pos = self.archivo.buscar_receta_nombre(nombre)
         if pos != -1:
@@ -65,7 +69,12 @@ class RecetarioLogica:
         self.archivo.modificar_receta(pos,receta.getDic())
 
     def eliminarReceta(self,pos):
+        '''elimina una receta'''
         self.archivo.eliminar_receta(pos)
+
+    def retorna_aleatorio(self):
+        lista = self.getRecetas()
+        return random.choice(lista)
         
 
 

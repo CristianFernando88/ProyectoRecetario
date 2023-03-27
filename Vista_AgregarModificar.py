@@ -8,6 +8,7 @@ from datetime import datetime as dt
 from PIL import ImageTk, Image
 from tkinter import filedialog
 class Vista_Agregar:
+    '''Crea una ventana para agregar o modificar una receta'''
     def __init__(self,parent,receta = None):
         self.parent = parent
         self.ventana = tk.Toplevel(self.parent)
@@ -218,6 +219,7 @@ class Vista_Agregar:
                     self.receta.favorito = self.favorito.get()
                     archivo_receta.modificaReceta(self.receta,pos)
                     messagebox.showinfo("Modificar","Cambios guardados exitosamente!")
+                    self.ventana.destroy()
         else:
             messagebox.showwarning("Agregar Producto","Las cajas principales estan vacias")
 
@@ -233,9 +235,15 @@ class Vista_Agregar:
             messagebox.showwarning("Receta ingrediente","Verifique que ningun campo este vacio")
     
     def eliminar_ingrediente(self):
-        indice = self.list_ingredientes.curselection()[0]
-        #print(indice)
-        self.list_ingredientes.delete(indice)
+        try:
+            indice = self.list_ingredientes.curselection()[0]
+            print(indice)
+            ing = self.receta.ingredientes[indice]
+            self.receta.eliminar_ingrediente(ing)
+            self.list_ingredientes.delete(indice)
+        except:
+            messagebox.showwarning("Ingredientes","Debe seleccionar un elemento de la lista")
+        
 
     def limpar_ingrediente(self):
         self.nom_ing.set("")
@@ -283,11 +291,11 @@ class Vista_Agregar:
     def eliminar_paso(self):
         try:  
             indice = self.list_pasos.curselection()[0]
-            print(indice)
+            #print(indice)
             paso = self.receta.lista_pasos[indice]
-            print(paso)
+            #print(paso)
             self.receta.eliminar_paso(paso)
-            print(self.receta.diccionario_pasos())
+            #print(self.receta.diccionario_pasos())
             self.list_pasos.delete(0,tk.END)
             for p in self.receta.lista_pasos:
                 self.list_pasos.insert(tk.END,p)

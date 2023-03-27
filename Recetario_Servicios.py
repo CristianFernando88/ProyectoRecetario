@@ -3,11 +3,17 @@ from Receta import Receta
 from Pasos import Pasos
 from Ingrediente import Ingrediente
 class RecetasCrud:
+    '''interactua con el archivo json
+        agrega, modifica, elimina y busca
+        recetas en el archivo json
+    '''
     def __init__(self,ruta):
+        '''recibe la ruta del archivo e inicializa el mismo si este no exite'''
         self.ruta = ruta
         self.existe_archivo()
 
     def get_recetas(self):
+        '''retorna una lista de diccionario con la informacion de la receta'''
         lista = []
         with open(self.ruta,"r") as archivo:
                 lista = json.load(archivo)
@@ -48,12 +54,14 @@ class RecetasCrud:
         return pos
     
     def eliminar_receta(self,pos):
+        '''elimina una receta del archivo json por posicion'''
         lista = self.get_recetas()
         del lista[pos]
         with open(self.ruta,"w") as archivo:
                 json.dump(lista,archivo)
     
     def modificar_receta(self,pos,receta_dic):
+        '''modifica una receta en el json'''
         lista = self.get_recetas()
         lista[pos] = receta_dic
         with open(self.ruta,"w") as archivo:
@@ -67,6 +75,7 @@ class RecetasCrud:
         "favorito": self.favorito '''
         
     def existe_archivo(self):
+        '''verifica la existencia del archivo en caso contrario lo crea'''
         lista = []
         try:
             with open(self.ruta,"r") as archivo:
