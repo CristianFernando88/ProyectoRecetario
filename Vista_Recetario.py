@@ -94,6 +94,7 @@ class Recetario(ttk.Frame):
     def cargar_receta_dia(self):
         receta = self.recetario.retorna_aleatorio()
         self.receta_dia.set(receta.nombre)
+        self.entry_receta_dia.config(state="readonly")
 
     def mostrar_receta_dia(self):
         nombre = self.receta_dia.get()

@@ -75,7 +75,7 @@ class Vista_Agregar:
 
         lbl_creacion = tk.Label(self.ventana,text="Fecha Creacion: ")
         lbl_creacion.grid(row=5,column=0,padx=10,pady=5)
-        input_creacion = tk.Entry(self.ventana,width=20,textvariable=self.fecha,state=tk.DISABLED)
+        input_creacion = tk.Entry(self.ventana,width=20,textvariable=self.fecha,state="readonly")
         input_creacion.grid(row=5,column=1,padx=5,pady=5)
 
         #cuadro imagen
